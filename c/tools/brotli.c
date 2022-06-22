@@ -194,6 +194,7 @@ static Command ParseParams(Context* params) {
   BROTLI_BOOL keep_set = BROTLI_FALSE;
   BROTLI_BOOL lgwin_set = BROTLI_FALSE;
   BROTLI_BOOL suffix_set = BROTLI_FALSE;
+  BROTLI_BOOL recursive_set = BROTLI_FALSE;
   BROTLI_BOOL after_dash_dash = BROTLI_FALSE;
   Command command = ParseAlias(argv[0]);
 
@@ -280,6 +281,13 @@ static Command ParseParams(Context* params) {
           keep_set = BROTLI_TRUE;
           params->junk_source = TO_BROTLI_BOOL(c == 'j');
           continue;
+        } else if (c == 'r') {
+            if (recursive_set) {
+                fprintf(stderr, "recursive already set\n");
+                return COMMAND_INVALID;
+            }
+            recursive_set = BROTLI_TRUE;
+            continue;
         } else if (c == 'n') {
           if (!params->copy_stat) {
             fprintf(stderr, "argument --no-copy-stat / -n already set\n");
@@ -315,7 +323,7 @@ static Command ParseParams(Context* params) {
           continue;
         }
         /* o/q/w/D/S with parameter is expected */
-        if (c != 'o' && c != 'q' && c != 'w' && c != 'D' && c != 'S') {
+        if (c != 'o' && c != 'q' && c != 'w' && c != 'D' && c != 'S' && c != 'r') {
           fprintf(stderr, "invalid argument -%c\n", c);
           return COMMAND_INVALID;
         }
@@ -522,6 +530,12 @@ static Command ParseParams(Context* params) {
           }
           suffix_set = BROTLI_TRUE;
           params->suffix = value;
+        } else if (strncmp("recursive", arg, key_len) == 0) {
+          if (recursive_set) {
+            fprintf(stderr, "recursive already set\n");
+            return COMMAND_INVALID;
+          }
+          recursive_set = BROTLI_TRUE;
         } else {
           fprintf(stderr, "invalid parameter: [%s]\n", arg);
           return COMMAND_INVALID;
